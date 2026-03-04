@@ -24,7 +24,7 @@ class JSONFile:
                 pass
         return path
 
-    def read_all(self):
+    def read_all(self) -> list | dict:
 
         with open(self.file_path, "r") as f:
 
@@ -76,6 +76,14 @@ class VaultData:
 
         self.json_handler.write_all(data)
 
+    def get_all(self):
+
+        raw_data = self.json_handler.read_all()
+
+        vault_data = [Credential.from_dict(c) for c in raw_data]
+
+        return vault_data
+
 
 class Attempts:
 
@@ -113,5 +121,8 @@ if __name__ == "__main__":
     # attempts.update(1, 2)
     # attempts.reset_attempts()
 
-    c = Credential("instagram", "vksahani", "sdfkldl")
-    vd.add_data(c)
+    # c = Credential("Facebook", "vkshni", "sdfkldl")
+    # vd.add_data(c)
+    # cs = vd.get_all()
+    # for c in cs:
+    #     print(c.service_name, c.username)
