@@ -42,15 +42,29 @@ class VaultMeta:
 
     def __init__(self):
         self.json_handler = JSONFile("vault_meta.json")
-        self.initialize()
+        # self.initialize()
 
-    def initialize(self):
+    # def initialize(self):
 
-        try:
-            self.json_handler.read_all()
-        except:
-            data = {"master_password_hash": None}
-            self.json_handler.write_all(data)
+    #     try:
+    #         self.json_handler.read_all()
+    #     except:
+    #         data = {"master_password_hash": None}
+    #         self.json_handler.write_all(data)
+
+    def setup(self, master_password_hash):
+
+        # data = self.json_handler.read_all()
+
+        data = {"master_password_hash": master_password_hash}
+        # data["master_password_hash"] = master_password_hash
+
+        self.json_handler.write_all(data)
+
+    def get_master_password_hash(self):
+
+        data = self.json_handler.read_all()
+        return data["master_password_hash"]
 
 
 class VaultData:
@@ -127,8 +141,10 @@ class Attempts:
     def update(self, failed_count, locked_until):
 
         data = self.json_handler.read_all()
-        data["failed_count"] = failed_count
-        data["locked_until"] = locked_until
+        if failed_count is not None:
+            data["failed_count"] = failed_count
+        if locked_until is not None:
+            data["locked_until"] = locked_until
 
         self.json_handler.write_all(data)
 
@@ -146,3 +162,8 @@ if __name__ == "__main__":
     # cs = vd.get_all()
     # for c in cs:
     #     print(c.service_name, c.username)
+    user_pwd = input("Enter password:")
+
+    pwd_hash = hash(user_pwd)
+    vm.setup(pwd_hash)
+    print(vm.get_master_password_hash())
