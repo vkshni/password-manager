@@ -66,7 +66,7 @@ class VaultData:
         except:
             self.json_handler.write_all([])
 
-    def add_data(self, credential: Credential):
+    def add(self, credential: Credential):
 
         credential_dict = credential.to_dict()
 
@@ -84,6 +84,26 @@ class VaultData:
 
         return vault_data
 
+    def update(self, credential: Credential):
+
+        data = self.get_all()
+
+        new_data = []
+        for c in data:
+            if c.id == credential.id:
+                c = credential
+            new_data.append(c.to_dict())
+
+        self.json_handler.write_all(new_data)
+
+    def delete(self, credential: Credential):
+
+        data = self.get_all()
+
+        filtered_data = [c.to_dict() for c in data if c.id != credential.id]
+
+        self.json_handler.write_all(filtered_data)
+
 
 class Attempts:
 
@@ -99,7 +119,7 @@ class Attempts:
             data = {"failed_count": 0, "locked_until": 0}
             self.json_handler.write_all(data)
 
-    def reset_attempts(self):
+    def reset(self):
 
         data = {"failed_count": 0, "locked_until": 0}
         self.json_handler.write_all(data)
