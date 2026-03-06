@@ -1,6 +1,9 @@
 from datetime import datetime
 from db import VaultData
 from entity import Credential
+from authservice import AuthService
+
+import hmac
 
 
 # Main Vault
@@ -8,21 +11,26 @@ class Vault:
 
     def __init__(self):
         self.vd = VaultData()
+        self.auth = AuthService()
 
     def add_credential(self, service_name, username, password):
+
+        self.auth.require_authenticated()
 
         credential_obj = Credential(service_name, username, password)
 
         self.vd.add(credential_obj)
 
     def list_services(self):
+        self.auth.require_authenticated()
 
         credentials = self.vd.get_all()
-        services = [c.service_name for c in credentials]
+        services = [[i, c.service_name] for i, c in enumerate(credentials)]
 
         return services
 
     def get_credential(self, service_name):
+        self.auth.require_authenticated()
 
         credentials = self.vd.get_all()
 
@@ -36,6 +44,7 @@ class Vault:
         self, service_name, new_service_name=None, new_username=None, new_password=None
     ):
 
+        self.auth.require_authenticated()
         credentials = self.get_credential(service_name)
 
         if not credentials:
@@ -57,6 +66,7 @@ class Vault:
             self.vd.update(c)
 
     def delete_credential(self, service_name, force=False):
+        self.auth.require_authenticated()
 
         credentials = self.get_credential(service_name)
 
@@ -73,12 +83,13 @@ class Vault:
 if __name__ == "__main__":
 
     v = Vault()
-    # v.add_credential("GitHub", "vkshnii", "vks_GIT")
     # v.delete_credential("instagram")
     # cs = v.get_credential("Instagra")
     # print(cs)
     # for c in cs:
     #     print(c.username, c.password)
 
-    v.update_credential("github", new_username="vijayksahani")
+    # v.update_credential("github", new_username="vijayksahani")
     # print(v.list_services())
+    # v.auth.verify_master("v1s")
+    # v.add_credential("GitHub", "vkshn", "vks@giti")
