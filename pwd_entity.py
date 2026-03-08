@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 """
 pwd_entity.py — Credential data model
 
@@ -34,15 +33,6 @@ class Credential:
         created_at    (datetime): Timestamp of when this record was first created.
         updated_at    (datetime | None): Timestamp of last update. None if never updated.
     """
-=======
-from uuid import uuid4
-from datetime import datetime
-
-# Credential Entity
-
-
-class Credential:
->>>>>>> 1d30d2a9e22903b71164bbbc98121a1a5fab6c4b
 
     def __init__(
         self,
@@ -51,7 +41,6 @@ class Credential:
         password,
         created_at=None,
         updated_at=None,
-<<<<<<< HEAD
         credential_id=None,
         label="default",
     ):
@@ -83,19 +72,11 @@ class Credential:
         # Use provided ID when loading from storage, generate new UUID for fresh records
         self.credential_id = str(credential_id) if credential_id else str(uuid4())
 
-=======
-        id=None,
-        label="default",
-    ):
-
-        self.id = str(id) if id else str(uuid4())
->>>>>>> 1d30d2a9e22903b71164bbbc98121a1a5fab6c4b
         self.service_name = service_name
         self.username = username
         self.password = password
         self.label = label
 
-<<<<<<< HEAD
         # Parse datetime strings when loading from storage, default to now for new records
         self.created_at = (
             datetime.strptime(created_at, DATETIME_FORMAT)
@@ -123,43 +104,19 @@ class Credential:
 
         return {
             "credential_id": self.credential_id,
-=======
-        self.validate_fields()
-
-        self.created_at = (
-            datetime.strptime(created_at, "%d-%m-%YT%H:%M:%S")
-            if created_at
-            else datetime.now()
-        )
-        self.updated_at = (
-            datetime.strptime(updated_at, "%d-%m-%YT%H:%M:%S") if updated_at else None
-        )
-
-    def to_dict(self):
-
-        return {
-            "id": self.id,
->>>>>>> 1d30d2a9e22903b71164bbbc98121a1a5fab6c4b
             "service_name": self.service_name,
             "label": self.label,
             "username": self.username,
             "password": self.password,
-<<<<<<< HEAD
             "created_at": self.created_at.strftime(DATETIME_FORMAT),
             # None is stored as JSON null — avoids empty string breaking strptime on load
             "updated_at": (
                 self.updated_at.strftime(DATETIME_FORMAT) if self.updated_at else None
-=======
-            "created_at": self.created_at.strftime("%d-%m-%YT%H:%M:%S"),
-            "updated_at": (
-                self.updated_at.strftime("%d-%m-%YT%H:%M:%S") if self.updated_at else ""
->>>>>>> 1d30d2a9e22903b71164bbbc98121a1a5fab6c4b
             ),
         }
 
     @classmethod
     def from_dict(cls, credential_dict):
-<<<<<<< HEAD
         """
         Deserialize a credential from a dictionary loaded from JSON storage.
 
@@ -202,24 +159,3 @@ class Credential:
             raise ValueError("Empty field: 'username'")
         if not self.password or self.password.isspace():
             raise ValueError("Empty field: 'password'")
-=======
-
-        return cls(
-            credential_dict["service_name"],
-            credential_dict["username"],
-            credential_dict["password"],
-            credential_dict["created_at"],
-            credential_dict["updated_at"],
-            credential_dict["id"],
-            credential_dict["label"],
-        )
-
-    def validate_fields(self):
-
-        if not self.service_name:
-            raise ValueError(f"Empty field: 'service name'")
-        if not self.username:
-            raise ValueError(f"Empty field: 'username'")
-        if not self.password:
-            raise ValueError(f"Empty field: 'password'")
->>>>>>> 1d30d2a9e22903b71164bbbc98121a1a5fab6c4b
