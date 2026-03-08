@@ -131,9 +131,17 @@ def test_login():
     except Exception as e:
         fail("is_authenticated stays False after failed login", str(e))
 
+    # Clean up failed attempts from wrong password tests above
+    attempts = Attempts(TEST_ATTEMPTS)
+    attempts.reset()
+
 
 def test_lockout():
     section("3. Lockout After 3 Failed Attempts")
+
+    # Reset state from previous tests before starting
+    attempts = Attempts(TEST_ATTEMPTS)
+    attempts.reset()
 
     # Fresh auth instance with clean attempts
     auth = get_auth()
