@@ -8,7 +8,7 @@ setup(
     name="shield-vault",
     version="1.0.0",
     description="A CLI password manager",
-    py_modules=["shield", "engine", "authservice", "entity", "db"],
+    py_modules=["shield", "vault", "authservice", "pwd_entity", "shield_db"],
     entry_points={
         "console_scripts": [
             "shield=shield:main",
