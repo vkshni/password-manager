@@ -1,13 +1,13 @@
 from pathlib import Path
 import json
-from os import mkdir
 
-from entity import Credential
+from pwd_entity import Credential
 
 BASE_DIR = Path(__file__).parent
 
 # Creating database directory
-pass
+DB_DIR = BASE_DIR / "database/"
+DB_DIR.mkdir(exist_ok=True)
 
 
 # Low levels
@@ -20,8 +20,8 @@ class JSONFile:
 
         path = BASE_DIR / "database" / file_name
         if not path.exists():
-            with open(path, "x") as f:
-                pass
+            with open(path, "w") as f:
+                json.dump(None, f, indent=4)
         return path
 
     def read_all(self) -> list | dict:
@@ -40,24 +40,20 @@ class JSONFile:
 
 class VaultMeta:
 
-    def __init__(self):
-        self.json_handler = JSONFile("vault_meta.json")
-        # self.initialize()
+    def __init__(self, file_name="vault_meta.json"):
+        self.json_handler = JSONFile(file_name)
 
-    # def initialize(self):
+    def is_initialized(self):
 
-    #     try:
-    #         self.json_handler.read_all()
-    #     except:
-    #         data = {"master_password_hash": None}
-    #         self.json_handler.write_all(data)
+        try:
+            self.get_master_password_hash()
+            return True
+        except:
+            return False
 
     def setup(self, master_password_hash):
 
-        # data = self.json_handler.read_all()
-
         data = {"master_password_hash": master_password_hash}
-        # data["master_password_hash"] = master_password_hash
 
         self.json_handler.write_all(data)
 
@@ -69,15 +65,17 @@ class VaultMeta:
 
 class VaultData:
 
-    def __init__(self):
-        self.json_handler = JSONFile("vault_data.json")
+    def __init__(self, file_name="vault_data.json"):
+        self.json_handler = JSONFile(file_name)
         self.initialize()
 
     def initialize(self):
 
         try:
-            self.json_handler.read_all()
-        except:
+            data = self.json_handler.read_all()
+            if data is None:  # handles the null case
+                self.json_handler.write_all([])
+        except (json.JSONDecodeError, ValueError):
             self.json_handler.write_all([])
 
     def add(self, credential: Credential):
@@ -100,45 +98,47 @@ class VaultData:
 
     def update(self, credential: Credential):
 
-        data = self.get_all()
+        data = self.json_handler.read_all()
 
-        new_data = []
-        for c in data:
-            if c.id == credential.id:
-                c = credential
-            new_data.append(c.to_dict())
+        for i, c in enumerate(data):
+            if c["credential_id"] == credential.credential_id:
+                data[i] = credential.to_dict()
+                break
 
-        self.json_handler.write_all(new_data)
+        self.json_handler.write_all(data)
 
     def delete(self, credential: Credential):
 
         data = self.get_all()
 
-        filtered_data = [c.to_dict() for c in data if c.id != credential.id]
+        filtered_data = [
+            c.to_dict() for c in data if c.credential_id != credential.credential_id
+        ]
 
         self.json_handler.write_all(filtered_data)
 
 
 class Attempts:
 
-    def __init__(self):
-        self.json_handler = JSONFile("attempts.json")
+    def __init__(self, file_name="attempts.json"):
+        self.json_handler = JSONFile(file_name)
         self.initialize()
 
     def initialize(self):
 
         try:
-            self.json_handler.read_all()
-        except:
-            data = {"failed_count": 0, "locked_until": 0}
-            self.json_handler.write_all(data)
+            data = self.json_handler.read_all()
+            if data is None:
+                self.reset()
+        except (json.JSONDecodeError, ValueError):
+            self.reset()
 
     def reset(self):
 
-        data = {"failed_count": 0, "locked_until": 0}
+        data = {"failed_count": 0, "locked_until": None}
         self.json_handler.write_all(data)
 
-    def update(self, failed_count, locked_until):
+    def update(self, failed_count=None, locked_until=None):
 
         data = self.json_handler.read_all()
         if failed_count is not None:
@@ -148,22 +148,11 @@ class Attempts:
 
         self.json_handler.write_all(data)
 
+    def get_data(self):
+
+        data = self.json_handler.read_all()
+        return data
+
 
 if __name__ == "__main__":
-    attempts = Attempts()
-    vd = VaultData()
-    vm = VaultMeta()
-
-    # attempts.update(1, 2)
-    # attempts.reset_attempts()
-
-    # c = Credential("Facebook", "vkshni", "sdfkldl")
-    # vd.add_data(c)
-    # cs = vd.get_all()
-    # for c in cs:
-    #     print(c.service_name, c.username)
-    user_pwd = input("Enter password:")
-
-    pwd_hash = hash(user_pwd)
-    vm.setup(pwd_hash)
-    print(vm.get_master_password_hash())
+    pass

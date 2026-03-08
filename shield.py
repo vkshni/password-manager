@@ -7,8 +7,8 @@
 import argparse
 import getpass
 import os
-from engine import Vault
-from db import VaultMeta
+from vault import Vault
+from shield_db import VaultMeta
 
 
 # ─── Display Helpers ─────────────────────────────────────────────────────────
