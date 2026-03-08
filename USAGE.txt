@@ -1,0 +1,193 @@
+================================================================================
+  SHIELD — CLI PASSWORD MANAGER
+  USAGE REFERENCE
+================================================================================
+
+INSTALLATION
+────────────────────────────────────────────────────────────────────────────────
+
+  From the project root directory:
+
+    pip install -e .
+
+  This installs the 'shield' command globally. Run it from any directory.
+
+  After installing, verify everything works:
+
+    python test.py
+
+  All tests should pass. Test files are created and deleted automatically.
+  Your vault data is never touched by the test suite.
+
+
+FIRST RUN
+────────────────────────────────────────────────────────────────────────────────
+
+  Create your vault (run once only):
+
+    shield setup
+
+  You will be prompted twice — once to enter the master password, once to
+  confirm it. Input is hidden while typing. Minimum 6 characters.
+
+  Your master password cannot be recovered if forgotten. There is no reset
+  option. Losing it means permanent loss of access to all stored credentials.
+
+
+OPENING THE VAULT
+────────────────────────────────────────────────────────────────────────────────
+
+  Every session:
+
+    shield login
+
+  Enter your master password when prompted. On success, the interactive
+  menu opens. The session stays active until you choose Exit.
+
+  Failed login attempts:
+    - 3 wrong attempts  → vault locks for 30 seconds
+    - Lockout persists if you close and reopen the program
+    - Correct password after failed attempts → counter resets
+
+
+INTERACTIVE MENU
+────────────────────────────────────────────────────────────────────────────────
+
+  After login, you will see:
+
+    [1]  List services
+    [2]  Add credential
+    [3]  Get credential
+    [4]  Update credential
+    [5]  Delete credential
+    [6]  Exit
+
+  Type the number and press Enter to select an action.
+  Press Enter after any action to return to the menu.
+  Ctrl+C at any prompt cancels the current action and returns to the menu.
+
+
+ACTIONS
+────────────────────────────────────────────────────────────────────────────────
+
+  [1] LIST SERVICES
+
+    Displays all stored services and their labels.
+
+    Output format:
+       1.  github
+       2.  instagram  (personal)
+       3.  instagram  (work)
+
+    Services with label 'default' show without a label in parentheses.
+
+
+  [2] ADD CREDENTIAL
+
+    Prompts for:
+      Service name    — e.g. github, netflix, gmail
+      Label           — press Enter to use 'default', or type a label
+                        (use labels when you have multiple accounts per service)
+      Username        — email or username for this account
+      Password        — hidden input
+
+    The combination of service name + label must be unique.
+    'github/default' and 'github/work' are two separate records.
+    'github/default' twice is rejected.
+
+
+  [3] GET CREDENTIAL
+
+    Prompts for service name and label.
+
+    If multiple accounts exist for the service, all labels are shown
+    and you are asked to pick one.
+
+    Username is shown immediately.
+    Password is shown only after re-entering the master password.
+    This re-authentication does not count toward the lockout limit.
+
+
+  [4] UPDATE CREDENTIAL
+
+    Prompts for service name and label to identify the record.
+    Then prompts for each field — press Enter to keep the current value.
+
+    Fields that can be updated:
+      Service name, label, username, password
+
+    Renaming service name or label checks for conflicts first.
+    updated_at timestamp is refreshed automatically on any change.
+
+
+  [5] DELETE CREDENTIAL
+
+    Prompts for service name and label.
+    Shows a confirmation prompt before deleting.
+    Type 'y' to confirm. Any other input cancels.
+
+    Deletion is permanent and cannot be undone.
+
+
+MULTIPLE ACCOUNTS PER SERVICE
+────────────────────────────────────────────────────────────────────────────────
+
+  Use labels to store multiple accounts under the same service:
+
+    Service: instagram   Label: personal   → stored as instagram/personal
+    Service: instagram   Label: work       → stored as instagram/work
+
+  When retrieving, if multiple accounts exist for a service, Shield
+  will list the available labels and ask which one you want.
+
+  If you only have one account per service, you can leave Label blank
+  (press Enter) and it will default to 'default'.
+
+
+DATABASE FILES
+────────────────────────────────────────────────────────────────────────────────
+
+  All data is stored in the 'database/' folder inside the project directory:
+
+    database/
+      vault_meta.json   — master password hash (never the password itself)
+      vault_data.json   — all credential records
+      attempts.json     — failed login state and lockout expiry
+
+  Do not edit these files manually. Corrupted JSON will cause errors.
+
+  To fully reset the vault (delete everything):
+    Delete the entire 'database/' folder.
+    Run 'shield setup' again to start fresh.
+
+
+SECURITY NOTES
+────────────────────────────────────────────────────────────────────────────────
+
+  - Master password is stored as a SHA-256 hash only. The plain text
+    is never written to disk at any point.
+
+  - Credential passwords are stored as plain text inside vault_data.json.
+    The security guarantee is the authentication gate, not file encryption.
+    Do not store vault_data.json in a location accessible to others.
+
+  - Hash comparison uses hmac.compare_digest() to prevent timing attacks.
+
+  - Lockout state persists to disk. Closing and reopening Shield does
+    not reset the lockout counter.
+
+  - There is no master password recovery mechanism. If you forget your
+    master password, all stored credentials are permanently inaccessible.
+
+
+QUICK REFERENCE
+────────────────────────────────────────────────────────────────────────────────
+
+  shield setup          Create vault (first run only)
+  shield login          Open vault session
+  python test.py        Run test suite (after install)
+
+  Inside the session:
+  1 → List    2 → Add    3 → Get    4 → Update    5 → Delete    6 → Exit
+
+================================================================================
