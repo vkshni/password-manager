@@ -2,9 +2,9 @@
 # Tests all core functionality using isolated test files
 # Cleans up after itself automatically
 
-from engine import Vault
+from vault import Vault
 from authservice import AuthService
-from db import VaultMeta, VaultData, Attempts
+from shield_db import VaultMeta, VaultData, Attempts
 from pathlib import Path
 import json
 
