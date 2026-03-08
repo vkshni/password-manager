@@ -87,7 +87,7 @@ After installing, run the test suite to confirm everything works correctly:
 python test.py
 ```
 
-All 25 tests should pass. The test suite creates its own isolated database files and deletes them automatically after running — your vault data is never touched.
+All 29 tests should pass. The test suite creates its own isolated database files and deletes them automatically after running — your vault data is never touched.
 
 ---
 
@@ -169,3 +169,5 @@ These are intentional constraints, not missing features:
 - No multi-user support
 - No export
 - No account recovery if master password is lost
+
+Made with ☕
